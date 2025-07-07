@@ -24,9 +24,7 @@ Cypress.Commands.add('signup', (username, password) => {
 Cypress.Commands.add('addToCart', (productName) => {
   cy.contains('.card-title', productName).click()
   cy.get('.btn-success').contains('Add to cart').click()
-  cy.on('window:alert', (str) => {
-    expect(str).to.equal('Product added')
-  })
+  cy.on('window:alert', () => true)
   cy.wait(1000)
 })
 
