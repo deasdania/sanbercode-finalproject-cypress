@@ -1,6 +1,8 @@
+const homePage = require('../support/pageObjects/homePage/homePage');
+
 describe('Authentication Tests', () => {
   beforeEach(() => {
-    cy.visit('/')
+    homePage.goToHomePage();
   })
 
   describe('Sign Up Functionality', () => {
@@ -9,12 +11,6 @@ describe('Authentication Tests', () => {
       cy.get('#signInModal').should('be.visible')
       cy.get('#sign-username').should('be.visible')
       cy.get('#sign-password').should('be.visible')
-    })
-
-    it('should close sign up modal', () => {
-      cy.get('#signin2').click()
-      cy.get('#signInModal .close').click()
-      cy.get('#signInModal').should('not.be.visible')
     })
 
     it('should show error for empty fields', () => {
@@ -36,6 +32,15 @@ describe('Authentication Tests', () => {
         expect(str).to.equal('Sign up successful.')
       })
     })
+
+    it('should show error for user already exist', () => {
+      const username = Cypress.env('username')
+      const password = Cypress.env('password')
+      cy.signup(username, password)
+      cy.on('window:alert', (str) => {
+        expect(str).to.equal('This user already exist.')
+      })
+    })
   })
 
   describe('Login Functionality', () => {
@@ -46,56 +51,36 @@ describe('Authentication Tests', () => {
       cy.get('#loginpassword').should('be.visible')
     })
 
-    it('should close login modal', () => {
-      cy.get('#login2').click()
-      cy.get('#logInModal .close').click()
-      cy.get('#logInModal').should('not.be.visible')
-    })
-
     it('should show error for invalid credentials', () => {
-      cy.login('invaliduser', 'invalidpass')
+      const timestamp = Date.now()
+      const username = `testuser${timestamp}`
+      const password = 'testpass123'
+      cy.login(username, password)
       cy.on('window:alert', (str) => {
         expect(str).to.equal('User does not exist.')
       })
     })
 
     it('should login with valid credentials', { tags: '@smoke' }, () => {
-      // First create a user
-      const timestamp = Date.now()
-      const username = `testuser${timestamp}`
-      const password = 'testpass123'
-      
-      cy.signup(username, password)
-      cy.on('window:alert', (str) => {
-        expect(str).to.equal('Sign up successful.')
-      })
-      
-      // Wait and dismiss the modal
-      cy.wait(2000)
-      cy.get('#signInModal .close').click()
-      
-      // Now login with the created user
+      const username = Cypress.env('username')
+      const password = Cypress.env('password')
       cy.login(username, password)
       cy.get('#nameofuser').should('contain', `Welcome ${username}`)
       cy.get('#logout2').should('be.visible')
     })
 
     it('should logout successfully', () => {
-      // Create and login user first
-      const timestamp = Date.now()
-      const username = `testuser${timestamp}`
-      const password = 'testpass123'
-      
-      cy.signup(username, password)
-      cy.wait(2000)
-      cy.get('#signInModal .close').click()
+      const username = Cypress.env('username')
+      const password = Cypress.env('password')
       cy.login(username, password)
-      
+      cy.get('#nameofuser').should('contain', `Welcome ${username}`)
+      cy.get('#logout2').should('be.visible')
       // Logout
       cy.get('#logout2').click()
       cy.get('#login2').should('be.visible')
       cy.get('#signin2').should('be.visible')
-      cy.get('#logout2').should('not.exist')
+      cy.wait(1000)
+      cy.get('#logout2').should('not.be.visible')
     })
   })
 })

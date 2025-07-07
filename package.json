@@ -14,12 +14,17 @@
     "cypress": "^13.6.0",
     "@cypress/grep": "^4.0.1"
   },
+  "dependencies": {
+    "cypress": "^14.3.2",
+    "cypress-mochawesome-reporter": "3.8.2",
+    "cypress-xpath": "^2.0.1"
+  },
   "keywords": [
     "cypress",
     "e2e",
     "testing",
     "demoblaze"
   ],
-  "author": "Your Name",
+  "author": "Dea Dania",
   "license": "MIT"
 }

@@ -4,6 +4,7 @@
 Cypress.Commands.add('login', (username, password) => {
   cy.get('#login2').click()
   cy.get('#loginusername').type(username)
+  cy.wait(2000)
   cy.get('#loginpassword').type(password)
   cy.get('button[onclick="logIn()"]').click()
   cy.wait(2000)
@@ -13,6 +14,7 @@ Cypress.Commands.add('login', (username, password) => {
 Cypress.Commands.add('signup', (username, password) => {
   cy.get('#signin2').click()
   cy.get('#sign-username').type(username)
+  cy.wait(2000)
   cy.get('#sign-password').type(password)
   cy.get('button[onclick="register()"]').click()
   cy.wait(2000)

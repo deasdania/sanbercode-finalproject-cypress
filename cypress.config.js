@@ -16,7 +16,7 @@ module.exports = defineConfig({
     },
     env: {
       // environment variables here
-      username: 'testuser',
+      username: 'testuserdea',
       password: 'testpass123'
     },
     setupNodeEvents(on, config) {
