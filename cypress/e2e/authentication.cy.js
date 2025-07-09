@@ -6,21 +6,21 @@ describe('Authentication Tests', () => {
   });
 
   describe('Sign Up Functionality', () => {
-    // it('should open sign up modal', () => {
-    //   AuthenticationPage
-    //     .openSignupModal()
-    //     .verifySignupModalVisible();
-    // });
+    it('should open sign up modal', () => {
+      AuthenticationPage
+        .openSignupModal()
+        .verifySignupModalVisible();
+    });
 
-    // it('should show error for empty fields', () => {
-    //   AuthenticationPage
-    //     .openSignupModal()
-    //     .clickSignupButton();
+    it('should show error for empty fields', () => {
+      AuthenticationPage
+        .openSignupModal()
+        .clickSignupButton();
 
-    //   cy.on('window:alert', (str) => {
-    //     expect(str).to.equal('Please fill out Username and Password.');
-    //   });
-    // });
+      cy.on('window:alert', (str) => {
+        expect(str).to.equal('Please fill out Username and Password.');
+      });
+    });
 
     it('should register new user successfully', () => {
       const timestamp = Date.now();
@@ -32,14 +32,14 @@ describe('Authentication Tests', () => {
         .verifySignupSuccess();
     });
 
-    // it('should show error for user already exists', () => {
-    //   const username = Cypress.env('username');
-    //   const password = Cypress.env('password');
+    it('should show error for user already exists', () => {
+      const username = Cypress.env('username');
+      const password = Cypress.env('password');
 
-    //   AuthenticationPage
-    //     .signup(username, password)
-    //     .verifyUserExists();
-    // });
+      AuthenticationPage
+        .signup(username, password)
+        .verifyUserExists();
+    });
 
     it('should close signup modal', () => {
       AuthenticationPage
@@ -50,21 +50,21 @@ describe('Authentication Tests', () => {
   });
 
   describe('Login Functionality', () => {
-    // it('should open login modal', () => {
-    //   AuthenticationPage
-    //     .openLoginModal()
-    //     .verifyLoginModalVisible();
-    // });
+    it('should open login modal', () => {
+      AuthenticationPage
+        .openLoginModal()
+        .verifyLoginModalVisible();
+    });
 
-    // it('should show error for invalid credentials', () => {
-    //   const timestamp = Date.now();
-    //   const username = `invaliduser${timestamp}`;
-    //   const password = 'invalidpass123';
+    it('should show error for invalid credentials', () => {
+      const timestamp = Date.now();
+      const username = `invaliduser${timestamp}`;
+      const password = 'invalidpass123';
 
-    //   AuthenticationPage
-    //     .login(username, password)
-    //     .verifyUserDoesNotExist();
-    // });
+      AuthenticationPage
+        .login(username, password)
+        .verifyUserDoesNotExist();
+    });
 
     it('should login with valid credentials', { tags: '@smoke' }, () => {
       const username = Cypress.env('username');
