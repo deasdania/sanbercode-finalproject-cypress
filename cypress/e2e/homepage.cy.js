@@ -2,7 +2,7 @@ const { HomePage } = require('../support/pageObjects/index');
 
 describe('Homepage Tests', () => {
   beforeEach(() => {
-    cy.visit('/')
+    HomePage.goToHomePage();
   })
 
   describe('Homepage Loading', () => {

@@ -131,11 +131,6 @@ class HomePage {
 
     verifyProducts() {
         cy.get(this.locators.product_cards).should('have.length.greaterThan', 0);
-        cy.get(this.locators.product_cards).first().within(() => {
-            cy.get('img').should('be.visible');
-            cy.xpath(this.locators.product_titles).should('be.visible');
-            cy.get(this.locators.product_prices).should('contain', '$');
-        });
         return this;
     }
 

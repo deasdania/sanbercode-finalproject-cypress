@@ -1,41 +1,66 @@
+const { HomePage, ProductPage } = require('../support/pageObjects/index');
+
 describe('Product Tests', () => {
   beforeEach(() => {
-    cy.visit('/')
+    HomePage.goToHomePage();
   })
 
   describe('Product Display', () => {
     it('should display product details when clicked', () => {
-      cy.xpath("//h4[@class='card-title']/a").first().then($title => {
-        const productName = $title.text()
-        cy.wrap($title).click()
-        
-        cy.get('.name').should('contain', productName)
-        cy.get('.price-container').should('be.visible')
-        cy.get('#more-information').should('be.visible')
-        cy.get('.btn-success').should('contain', 'Add to cart')
-      })
+      // Get first product name from homepage
+      cy.xpath(HomePage.locators.product_titles).first().then($title => {
+        const productName = $title.text();
+
+        // Navigate to product using HomePage method
+        HomePage.clickProduct(productName);
+
+        // Verify product page using ProductPage methods
+        ProductPage.verifyProductPage(productName);
+        ProductPage.verifyProductImage();
+      });
     })
 
+
     it('should display product image and description', () => {
-      cy.xpath("//h4[@class='card-title']/a").first().click()
-      cy.get('.item img').should('be.visible')
-      cy.get('#more-information').should('not.be.empty')
+      // Navigate to first product
+      HomePage.clickFirstProduct();
+
+      // Verify product elements using ProductPage
+      ProductPage.verifyProductImage();
+
+      // Verify description is not empty
+      ProductPage.getProductDescription().then(description => {
+        expect(description.trim()).to.not.be.empty;
+      });
     })
   })
 
   describe('Product Navigation', () => {
     it('should navigate back from product page', () => {
-      cy.xpath("//h4[@class='card-title']/a").first().click()
-      cy.go('back')
-      cy.get('.card').should('have.length.greaterThan', 0)
+      HomePage.clickFirstProduct();
+
+      // Use ProductPage method to go back
+      ProductPage.goBack();
+
+      // Verify we're back on homepage using HomePage verification
+      HomePage.verifyProducts();
     })
 
     it('should maintain category filter after viewing product', () => {
-      cy.selectCategory('Phones')
-      cy.xpath("//h4[@class='card-title']/a").first().click()
-      cy.go('back')
-      // Should still show phones category
-      cy.xpath("//h4[@class='card-title']/a").first().should('exist')
+      // Select category using HomePage method
+      HomePage.selectCategory('Phones');
+
+      // Click first product in phones category
+      HomePage.clickFirstProduct();
+
+      // Go back using ProductPage method
+      ProductPage.goBack();
+
+      // Verify we still have products displayed (should be phones)
+      HomePage.verifyProducts();
+      HomePage.getProductCount().then(count => {
+        expect(count).to.be.greaterThan(0);
+      });
     })
   })
 })
