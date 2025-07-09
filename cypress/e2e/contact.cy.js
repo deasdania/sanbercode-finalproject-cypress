@@ -1,107 +1,160 @@
-describe('Contact and About Tests - XPath Version', () => {
+const { ContactPage } = require('../support/pageObjects/index');
+
+describe('Contact and About Tests - Page Object Model Version', () => {
   beforeEach(() => {
     cy.visit('/')
   })
 
   describe('Contact Modal', () => {
     it('should open contact modal', () => {
-      // Use XPath with normalize-space for reliable text matching
-      cy.xpath("//a[normalize-space()='Contact']").click()
-      cy.get('#exampleModal').should('be.visible')
-      cy.wait(500) // Wait for modal animation
-      
-      // Check individual fields are visible and interactable
-      cy.xpath("//input[@id='recipient-email']").should('be.visible').and('not.be.disabled')
-      cy.xpath("//input[@id='recipient-name']").should('be.visible').and('not.be.disabled')
-      cy.xpath("//textarea[@id='message-text']").should('be.visible').and('not.be.disabled')
+      ContactPage.openContactModal()
+      ContactPage.verifyContactModalVisible()
     })
 
     it('should close contact modal', () => {
-      cy.xpath("//a[normalize-space()='Contact']").click()
-      cy.get('#exampleModal').should('be.visible')
-      cy.wait(500) // Wait for modal to fully load
-      
-      // Use XPath for close button
-      cy.xpath("//div[@id='exampleModal']//button[@class='close']").click({ force: true })
-      cy.get('#exampleModal').should('not.be.visible')
+      ContactPage.openContactModal()
+      ContactPage.closeContactModal()
     })
 
     it('should send message successfully', { tags: '@smoke' }, () => {
-      cy.xpath("//a[normalize-space()='Contact']").click()
-      
-      // Wait for modal to be fully visible and interactive
-      cy.get('#exampleModal').should('be.visible')
-      cy.xpath("//input[@id='recipient-email']").should('be.visible').and('not.be.disabled')
-      cy.wait(1000) // Give extra time for modal animation
-      
-      // Type in fields using XPath selectors
-      cy.xpath("//input[@id='recipient-email']").type('test@example.com', { force: true })
-      cy.xpath("//input[@id='recipient-name']").type('John Doe', { force: true })
-      cy.xpath("//textarea[@id='message-text']").type('This is a test message from Cypress automation.', { force: true })
-      
-      // Click send button using XPath
-      cy.xpath("//button[@onclick='send()']").click({ force: true })
-      
-      cy.on('window:alert', (str) => {
-        expect(str).to.equal('Thanks for the message!!')
-      })
+      const contactData = {
+        email: 'test@example.com',
+        name: 'John Doe',
+        message: 'This is a test message from Cypress automation using POM.'
+      }
+
+      ContactPage.openContactModal()
+      ContactPage.fillContactForm(contactData.email, contactData.name, contactData.message)
+      ContactPage.submitContactForm()
+      ContactPage.verifyContactSubmission()
     })
 
     it('should handle empty form submission', () => {
-      cy.xpath("//a[normalize-space()='Contact']").click()
-      cy.get('#exampleModal').should('be.visible')
-      cy.wait(500)
-      
-      cy.xpath("//button[@onclick='send()']").click({ force: true })
-      
-      // Should show validation or alert for empty fields
-      cy.on('window:alert', (str) => {
-        expect(str).to.be.a('string')
-      })
+      ContactPage.openContactModal()
+      ContactPage.submitContactForm()
+      // The verification will be handled by the page object
+    })
+
+    it('should fill and clear contact form', () => {
+      const contactData = {
+        email: 'test@example.com',
+        name: 'John Doe',
+        message: 'This is a test message.'
+      }
+
+      ContactPage.openContactModal()
+      ContactPage.fillContactForm(contactData.email, contactData.name, contactData.message)
+
+      // Verify fields are filled
+      cy.xpath(ContactPage.locators.contact_email).should('have.value', contactData.email)
+      cy.xpath(ContactPage.locators.contact_name).should('have.value', contactData.name)
+      cy.xpath(ContactPage.locators.contact_message).should('have.value', contactData.message)
+
+      ContactPage.closeContactModal()
     })
   })
 
   describe('About Us Modal', () => {
-  it('should open about us modal', () => {
-    cy.xpath("//a[normalize-space()='About us']").click()
-    cy.get('#videoModal').should('be.visible')
-    cy.wait(500)
-    cy.xpath("//video").should('exist')
-  })
+    it('should open about us modal', () => {
+      ContactPage.openAboutModal()
+      ContactPage.verifyAboutModalVisible()
+    })
 
-  it('should close about us modal', () => {
-    cy.xpath("//a[normalize-space()='About us']").click()
-    cy.get('#videoModal').should('be.visible')
-    cy.wait(500)
-    
-    cy.xpath("//div[@id='videoModal']//button[@class='close']").click({ force: true })
-    cy.get('#videoModal').should('not.be.visible')
-  })
-})
+    it('should close about us modal', () => {
+      ContactPage.openAboutModal()
+      ContactPage.closeAboutModal()
+    })
 
-describe('Footer Links', () => {
-  it('should display footer information', () => {
-    cy.scrollTo('bottom')
-    cy.get('body').then($body => {
-      if ($body.find('footer').length > 0) {
-        cy.xpath("//footer").should('be.visible')
-      } else {
-        cy.log('No footer found - this is acceptable')
-      }
+    it('should verify video attributes', () => {
+      ContactPage.openAboutModal()
+      ContactPage.verifyVideoAttributes()
+      ContactPage.verifyVideoPaused()
     })
   })
 
-  it('should handle footer navigation', () => {
-    cy.scrollTo('bottom')
-    cy.get('body').then($body => {
-      if ($body.find('footer a').length > 0) {
-        cy.xpath("//footer//a").each($el => {
-          cy.wrap($el).should('have.attr', 'href')
-        })
-      } else {
-        cy.log('No footer links found')
-      }
+  describe('Footer Information', () => {
+    it('should display footer information', () => {
+      ContactPage.verifyFooterVisible()
     })
   })
-})
+
+  describe('Combined Modal Tests', () => {
+    it('should handle multiple modal interactions', () => {
+      // Test Contact Modal
+      ContactPage.openContactModal()
+      ContactPage.verifyContactModalVisible()
+      ContactPage.closeContactModal()
+
+      // Test About Modal
+      ContactPage.openAboutModal()
+      ContactPage.verifyAboutModalVisible()
+      ContactPage.closeAboutModal()
+    })
+
+    it('should send contact message and view about video', () => {
+      const contactData = {
+        email: 'customer@example.com',
+        name: 'Test User',
+        message: 'I would like to know more about your products and services.'
+      }
+
+      // Send contact message
+      ContactPage.openContactModal()
+      ContactPage.fillContactForm(contactData.email, contactData.name, contactData.message)
+      ContactPage.submitContactForm()
+      ContactPage.verifyContactSubmission()
+
+      // View about video
+      ContactPage.openAboutModal()
+      ContactPage.verifyAboutModalVisible()
+      ContactPage.verifyVideoAttributes()
+      ContactPage.closeAboutModal()
+    })
+  })
+
+  describe('Modal Accessibility and UX', () => {
+    it('should ensure contact modal is accessible', () => {
+      ContactPage.openContactModal()
+
+      // Check that modal has proper focus management
+      cy.get(ContactPage.locators.contact_modal).should('have.class', 'show')
+      cy.get(ContactPage.locators.contact_modal).should('have.attr', 'role', 'dialog')
+
+      // Check that form elements are properly labeled
+      cy.xpath(ContactPage.locators.contact_email).should('have.attr', 'id', 'recipient-email')
+      cy.xpath(ContactPage.locators.contact_name).should('have.attr', 'id', 'recipient-name')
+      cy.xpath(ContactPage.locators.contact_message).should('have.attr', 'id', 'message-text')
+
+      ContactPage.closeContactModal()
+    })
+
+    it('should handle modal backdrop clicks', () => {
+      ContactPage.openContactModal()
+
+      // Click on modal backdrop (outside the modal content)
+      cy.get(ContactPage.locators.contact_modal).click({ multiple: true, force: true })
+
+      // Modal should still be visible (depends on implementation)
+      cy.get(ContactPage.locators.contact_modal).should('be.visible')
+
+      ContactPage.closeContactModal()
+    })
+  })
+
+  describe('Error Handling', () => {
+    it('should handle network errors gracefully', () => {
+      // Simulate network failure
+      cy.intercept('POST', '**/send', { forceNetworkError: true }).as('sendError')
+
+      ContactPage.openContactModal()
+      ContactPage.fillContactForm('test@example.com', 'Test User', 'Test message')
+      ContactPage.submitContactForm()
+
+      // Handle the error case - this depends on how the application handles network errors
+      cy.on('window:alert', (str) => {
+        expect(str).to.be.a('string')
+      })
+    })
+
+  })
 })

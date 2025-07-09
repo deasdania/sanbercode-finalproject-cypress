@@ -101,6 +101,7 @@ class HomePage {
 
     // Verification Methods
     verifyHomePage() {
+        cy.wait(2000);
         cy.title().should('contain', 'STORE');
         cy.get(this.locators.navbar_brand).should('contain', 'PRODUCT STORE');
         cy.get(this.locators.categories_section).should('be.visible');
