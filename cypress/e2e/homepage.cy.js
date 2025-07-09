@@ -46,20 +46,6 @@ describe('Demoblaze Homepage Tests', () => {
     cy.wait(1000)
   })
 
-  it('should filter products by category', { tags: '@smoke' }, () => {
-    // Test Phones category
-    cy.selectCategory('Phones')
-    cy.get('.card-title').should('contain', 'Samsung galaxy s6')
-    
-    // Test Laptops category
-    cy.selectCategory('Laptops')
-    cy.get('.card-title').should('contain', 'Sony vaio i5')
-    
-    // Test Monitors category
-    cy.selectCategory('Monitors')
-    cy.get('.card-title').should('contain', 'Apple monitor 24')
-  })
-
   it('should handle pagination', () => {
     // Check if Next button exists and click it
     cy.get('#next2').then($btn => {

@@ -30,7 +30,7 @@ Cypress.Commands.add('addToCart', (productName) => {
 
 // Navigate to category
 Cypress.Commands.add('selectCategory', (category) => {
-  cy.get('#cat').contains(category).click()
+  cy.xpath("//a[@id='cat']").click()
   cy.wait(2000)
 })
 

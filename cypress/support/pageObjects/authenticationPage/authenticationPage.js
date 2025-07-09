@@ -9,22 +9,26 @@ class AuthenticationPage {
 
     // Sign Up Methods
     openSignupModal() {
+        cy.wait(2000);
         cy.get(homePageLocators.nav_signup).click();
         return this;
     }
 
     fillSignupForm(username, password) {
         cy.get(this.locators.signup_username).type(username);
+        cy.wait(2000);
         cy.get(this.locators.signup_password).type(password);
         return this;
     }
 
     clickSignupButton() {
         cy.get(this.locators.signup_button).click();
+        cy.wait(2000);
         return this;
     }
 
     closeSignupModal() {
+        cy.wait(2000);
         cy.get(this.locators.signup_close).click();
         return this;
     }
@@ -44,12 +48,14 @@ class AuthenticationPage {
 
     fillLoginForm(username, password) {
         cy.get(this.locators.login_username).type(username);
+        cy.wait(2000);
         cy.get(this.locators.login_password).type(password);
         return this;
     }
 
     clickLoginButton() {
         cy.get(this.locators.login_button).click();
+        cy.wait(2000);
         return this;
     }
 
@@ -76,6 +82,7 @@ class AuthenticationPage {
     verifyLoginModalVisible() {
         cy.get(this.locators.login_modal).should('be.visible');
         cy.get(this.locators.login_username).should('be.visible');
+        cy.wait(2000)
         cy.get(this.locators.login_password).should('be.visible');
         return this;
     }

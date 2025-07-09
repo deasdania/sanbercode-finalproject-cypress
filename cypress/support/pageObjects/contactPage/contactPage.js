@@ -1,89 +1,103 @@
-
 const contactLocators = require('./contact-locators');
-const homePageLocators = require('../homePage/homepage-locators');
 
 class ContactPage {
     constructor() {
         this.locators = contactLocators;
     }
 
-    // Contact Methods
+    // CONTACT MODAL METHODS - XPATH VERSION
     openContactModal() {
-        cy.get(homePageLocators.nav_contact).click();
-        return this;
+        cy.xpath(this.locators.contact_link).click()
+        cy.get(this.locators.contact_modal).should('be.visible')
+        cy.get(this.locators.contact_modal).should('have.class', 'show')
+        cy.wait(1000) // Wait for Bootstrap animation
+        return this
     }
 
     fillContactForm(email, name, message) {
-        cy.get(this.locators.contact_email).type(email);
-        cy.get(this.locators.contact_name).type(name);
-        cy.get(this.locators.contact_message).type(message);
-        return this;
+        // Wait for fields to be interactable using XPath
+        cy.xpath(this.locators.contact_email).should('be.visible').and('not.be.disabled')
+        cy.xpath(this.locators.contact_name).should('be.visible').and('not.be.disabled')
+        cy.xpath(this.locators.contact_message).should('be.visible').and('not.be.disabled')
+        
+        // Fill with XPath selectors and force as backup
+        cy.xpath(this.locators.contact_email).clear({ force: true }).type(email, { force: true })
+        cy.xpath(this.locators.contact_name).clear({ force: true }).type(name, { force: true })
+        cy.xpath(this.locators.contact_message).clear({ force: true }).type(message, { force: true })
+        return this
     }
 
-    sendMessage() {
-        cy.get(this.locators.contact_send_button).click();
-        return this;
+    submitContactForm() {
+        cy.xpath(this.locators.contact_send_button).should('be.visible').click({ force: true })
+        return this
     }
 
     closeContactModal() {
-        cy.get(this.locators.contact_close).click();
-        return this;
+        cy.xpath(this.locators.contact_close).click({ force: true })
+        cy.get(this.locators.contact_modal).should('not.be.visible')
+        return this
     }
 
-    submitContactForm(email, name, message) {
-        this.openContactModal();
-        this.fillContactForm(email, name, message);
-        this.sendMessage();
-        return this;
-    }
-
-    // About Methods
+    // ABOUT MODAL METHODS - XPATH VERSION
     openAboutModal() {
-        cy.get(homePageLocators.nav_about).click();
-        return this;
+        cy.xpath(this.locators.about_link).click()
+        cy.get(this.locators.about_modal).should('be.visible')
+        cy.get(this.locators.about_modal).should('have.class', 'show')
+        cy.wait(1000)
+        return this
     }
 
     closeAboutModal() {
-        cy.get(this.locators.about_close).click();
-        return this;
+        cy.xpath(this.locators.about_close).click({ force: true })
+        cy.get(this.locators.about_modal).should('not.be.visible')
+        return this
     }
 
-    // Verification Methods
-    verifyContactModal() {
-        cy.get(this.locators.contact_modal).should('be.visible');
-        cy.get(this.locators.contact_email).should('be.visible');
-        cy.get(this.locators.contact_name).should('be.visible');
-        cy.get(this.locators.contact_message).should('be.visible');
-        return this;
+    // VERIFICATION METHODS - XPATH VERSION
+    verifyContactModalVisible() {
+        cy.get(this.locators.contact_modal).should('be.visible')
+        cy.xpath(this.locators.contact_email).should('be.visible')
+        cy.xpath(this.locators.contact_name).should('be.visible')
+        cy.xpath(this.locators.contact_message).should('be.visible')
+        return this
     }
 
-    verifyAboutModal() {
-        cy.get(this.locators.about_modal).should('be.visible');
-        cy.get(this.locators.about_video).should('be.visible');
-        return this;
+    verifyAboutModalVisible() {
+        cy.get(this.locators.about_modal).should('be.visible')
+        cy.xpath(this.locators.about_video).should('be.visible')
+        return this
     }
 
-    verifyMessageSent() {
+    verifyContactSubmission() {
         cy.on('window:alert', (str) => {
-            expect(str).to.equal('Thanks for the message!!');
-        });
-        return this;
-    }
-
-    verifyEmailValidation() {
-        cy.get(this.locators.contact_email + ':invalid').should('exist');
-        return this;
+            expect(str).to.equal('Thanks for the message!!')
+        })
+        return this
     }
 
     verifyVideoAttributes() {
-        cy.get(this.locators.about_video).should('have.attr', 'controls');
-        cy.get(this.locators.about_video).should('have.attr', 'src');
-        return this;
+        cy.xpath(this.locators.about_video).should('have.attr', 'controls')
+        cy.xpath(this.locators.about_video).should('have.attr', 'src')
+        return this
     }
 
     verifyVideoPaused() {
-        cy.get(this.locators.about_video).should('have.prop', 'paused', true);
-        return this;
+        cy.xpath(this.locators.about_video).should('have.prop', 'paused', true)
+        return this
+    }
+
+    // FOOTER METHODS - XPATH VERSION
+    verifyFooterVisible() {
+        cy.scrollTo('bottom')
+        cy.xpath(this.locators.footer).should('be.visible')
+        return this
+    }
+
+    verifyFooterLinks() {
+        cy.xpath(this.locators.footer_links).each($el => {
+            cy.wrap($el).should('have.attr', 'href')
+        })
+        return this
     }
 }
 
