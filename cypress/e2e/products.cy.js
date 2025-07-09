@@ -3,6 +3,7 @@ const { HomePage, ProductPage } = require('../support/pageObjects/index');
 describe('Product Tests', () => {
   beforeEach(() => {
     HomePage.goToHomePage();
+    cy.wait(2000);
   })
 
   describe('Product Display', () => {
