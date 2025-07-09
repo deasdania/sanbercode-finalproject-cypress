@@ -1,212 +1,173 @@
-const homePage = require('../support/pageObjects/homePage/homePage');
+const { HomePage, ProductPage, CartPage } = require('../support/pageObjects');
 
-describe('Shopping Cart Tests with XPath', () => {
-  beforeEach(() => {
-    homePage.goToHomePage();
-  })
-
-  describe('Cart Navigation', () => {
-    it('should navigate to cart page', () => {
-      cy.xpath("//a[@id='cartur']").click()
-      cy.url().should('include', 'cart.html')
-      cy.xpath("//h2[contains(text(), 'Products')]").should('be.visible')
-    })
-
-    it('should display empty cart initially', () => {
-      cy.xpath("//a[@id='cartur']").click()
-      cy.url().should('include', 'cart.html')
-
-      // Check cart is empty by verifying no product rows
-      cy.xpath("//tbody/tr").should('have.length', 0)
-
-      // Total element exists but might be empty
-      cy.xpath("//h3[@id='totalp']").should('exist')
-      cy.xpath("//h3[@id='totalp']").invoke('text').then(text => {
-        expect(text.trim()).to.be.oneOf(['', '0', '$0'])
-      })
-    })
-  })
-
-  describe('Add Products to Cart', () => {
-    it('should display product in cart after adding', { tags: '@smoke' }, () => {
-      // Get first product name using XPath
-      cy.xpath("//h4[@class='card-title']/a").first().then($title => {
-        const productName = $title.text()
-        cy.addToCart(productName)
-
-        // Navigate to cart
-        cy.xpath("//a[@id='cartur']").click()
-
-        // Verify product is in cart
-        cy.xpath("//tbody/tr").should('have.length', 1)
-        cy.xpath("//tbody/tr[1]").should('contain', productName)
-      })
-    })
-
-    it('should update total price when adding products', () => {
-      // Click first product using XPath
-      cy.xpath("//h4[@class='card-title']/a").first().click()
-      
-      cy.xpath("//h3[@class='price-container']").invoke('text').then(price => {
-        const firstPrice = parseInt(price.replace('$', '').replace('*includes tax', '').trim())
-        
-        // Add to cart using XPath
-        cy.xpath("//a[contains(@class, 'btn-success') and contains(text(), 'Add to cart')]").click()
-        cy.on('window:alert', () => true)
-        cy.wait(1000)
-
-        cy.xpath("//a[@id='cartur']").click()
-        cy.xpath("//h3[@id='totalp']").invoke('text').then(totalText => {
-          const cleanText = totalText.trim()
-          
-          if (cleanText && cleanText !== '') {
-            const total = parseInt(cleanText.replace(/[^\d]/g, ''))
-            
-            if (!isNaN(total)) {
-              expect(total).to.equal(firstPrice)
-            } else {
-              cy.log('Total is not a valid number:', cleanText)
-              expect(total).to.be.greaterThan(0) // Fallback assertion
-            }
-          } else {
-            cy.log('Total element is empty')
-            // Just verify cart has items instead
-            cy.xpath("//tbody/tr").should('have.length', 1)
-          }
-        })
-      })
-    })
-
-    it('should add multiple products to cart', () => {
-      // Add first product
-      cy.xpath("//h4[@class='card-title']/a").first().then($title => {
-        const productName = $title.text()
-        cy.addToCart(productName)
-      })
-
-      homePage.goToHomePage();
-      cy.wait(1000)
-      
-      // Add second product
-      cy.xpath("//h4[@class='card-title']/a").eq(1).then($title => {
-        const productName = $title.text()
-        cy.addToCart(productName)
-      })
-
-      // Check cart has 2 items
-      cy.xpath("//a[@id='cartur']").click()
-      cy.xpath("//tbody/tr").should('have.length', 2)
-    })
-  })
-
-  describe('Cart Management', () => {
+describe('Shopping Cart Tests', () => {
     beforeEach(() => {
-      // Add a product to cart before each test
-      cy.xpath("//h4[@class='card-title']/a").first().then($title => {
-        const productName = $title.text()
-        cy.addToCart(productName)
-      })
-      cy.xpath("//a[@id='cartur']").click()
-      cy.wait(1000)
-    })
+        HomePage.goToHomePage();
+    });
 
-    it('should remove product from cart', () => {
-      cy.xpath("//tbody/tr").should('have.length', 1)
-      
-      // Delete using XPath - more specific selector
-      cy.xpath("//tbody/tr[1]//a[contains(text(), 'Delete')]").click()
-      cy.wait(1000)
-      
-      cy.xpath("//tbody/tr").should('have.length', 0)
-    })
+    describe('Cart Navigation', () => {
+        it('should navigate to cart page', () => {
+            CartPage
+                .goToCart()
+                .verifyCartPage();
+        });
 
-    it('should display correct product information in cart', () => {
-      cy.xpath("//tbody/tr").should('have.length', 1)
-      cy.xpath("//tbody/tr[1]/td[2]").should('not.be.empty') 
-    })
-  })
+        it('should display empty cart initially', () => {
+            CartPage
+                .goToCart()
+                .verifyCartPage()
+                .verifyEmptyCart();
+        });
+    });
 
-  describe('Checkout Process', () => {
-    beforeEach(() => {
-      // Add a product and go to cart
-      cy.xpath("//h4[@class='card-title']/a").first().then($title => {
-        const productName = $title.text()
-        cy.addToCart(productName)
-      })
-      cy.xpath("//a[@id='cartur']").click()
-      cy.wait(1000)
-    })
+    describe('Add Products to Cart', () => {
+        it('should display product in cart after adding', { tags: '@smoke' }, () => {
+            // Get first product name and add to cart
+            cy.xpath(HomePage.locators.product_titles).first().then($title => {
+                const productName = $title.text();
 
-    it('should open place order modal', () => {
-      cy.xpath("//button[contains(@class, 'btn-success') and contains(text(), 'Place Order')]").click()
-      cy.xpath("//div[@id='orderModal']").should('be.visible')
-      cy.xpath("//input[@id='name']").should('be.visible')
-      cy.xpath("//input[@id='country']").should('be.visible')
-      cy.xpath("//input[@id='city']").should('be.visible')
-      cy.xpath("//input[@id='card']").should('be.visible')
-      cy.xpath("//input[@id='month']").should('be.visible')
-      cy.xpath("//input[@id='year']").should('be.visible')
-    })
+                HomePage.clickProduct(productName);
+                ProductPage
+                    .verifyProductPage(productName)
+                    .addToCart()
+                    .verifyAddToCartAlert();
 
-    it('should close place order modal', () => {
-      cy.xpath("//button[contains(@class, 'btn-success') and contains(text(), 'Place Order')]").click()
-      cy.wait(1500)
-      cy.xpath("//div[@id='orderModal']//button[@class='close']").click()
-      cy.xpath("//div[@id='orderModal']").should('not.be.visible')
-    })
+                CartPage
+                    .goToCart()
+                    .verifyProductInCart(productName);
+            });
+        });
 
-    it('should complete purchase successfully', { tags: '@smoke' }, () => {
-      const customerData = {
-        name: 'John Doe',
-        country: 'USA',
-        city: 'New York',
-        card: '1234567890123456',
-        month: '12',
-        year: '2025'
-      }
+        it('should update total price when adding products', () => {
+            HomePage.clickFirstProduct();
 
-      cy.completePurchase(customerData)
+            ProductPage.getProductPrice().then(priceText => {
+                const price = parseInt(priceText.replace(/[^\d]/g, ''));
 
-      // Verify success message using XPath
-      cy.xpath("//div[contains(@class, 'sweet-alert')]").should('be.visible')
-      cy.xpath("//div[contains(@class, 'sweet-alert')]//h2").should('contain', 'Thank you for your purchase!')
-      cy.wait(3000)
-      cy.get('.confirm').click()
-      
-      // Should redirect to homepage
-      cy.url().should('include', 'index.html')  
-    })
+                ProductPage
+                    .addToCart()
+                    .verifyAddToCartAlert();
 
-    it('should show validation for empty required fields', () => {
-      cy.get('.btn-success').contains('Place Order').click()
-      cy.wait(2000)
-      cy.xpath("//button[@onclick='purchaseOrder()']").click()
+                CartPage
+                    .goToCart()
+                    .verifyTotalPrice(price);
+            });
+        });
 
-      cy.on('window:alert', () => true)
-    })
+        it('should add multiple products to cart', () => {
+            // Add first product
+            cy.xpath(HomePage.locators.product_titles).first().then($title => {
+                const firstProduct = $title.text();
+                HomePage.clickProduct(firstProduct);
+                ProductPage.addToCart().verifyAddToCartAlert();
+            });
 
-    it('should calculate total correctly for multiple items', () => {
-      // Go back and add another product
-      homePage.goToHomePage();
-      cy.xpath("//h4[@class='card-title']/a").eq(1).then($title => {
-        const productName = $title.text()
-        cy.addToCart(productName)
-      })
+            HomePage.goToHomePage();
+            cy.wait(1000)
 
-      cy.xpath("//a[@id='cartur']").click()
+            // Add second product
+            cy.xpath(HomePage.locators.product_titles).eq(1).then($title => {
+                const secondProduct = $title.text();
+                HomePage.clickProduct(secondProduct);
+                ProductPage.addToCart().verifyAddToCartAlert();
+            });
 
-      // Check that total is sum of both products
-      cy.xpath("//h3[@id='totalp']").invoke('text').then(totalText => {
-        const cleanTotal = totalText.replace(/[^\d]/g, '') // Extract numbers only
-        const total = parseInt(cleanTotal) || 0
-        
-        if (total > 0) {
-          expect(total).to.be.greaterThan(0)
-        } else {
-          // Fallback: verify cart functionality
-          cy.xpath("//tbody/tr").should('have.length', 2)
-        }
-      })
-    })
-  })
-})
+            // Verify cart has 2 items
+            CartPage.goToCart();
+            CartPage.getCartItemCount(2);
+        });
+    });
+
+    describe('Cart Management', () => {
+        beforeEach(() => {
+            // Add a product to cart before each test
+            HomePage.clickFirstProduct();
+            ProductPage.addToCart().verifyAddToCartAlert();
+            CartPage.goToCart();
+        });
+
+        it('should remove product from cart', () => {
+            CartPage.getCartItemCount(1);
+            CartPage.removeProduct(0);
+            CartPage.getCartItemCount(0);
+        });
+
+        it('should display correct product information in cart', () => {
+            CartPage.getCartItemCount(1);
+
+            cy.xpath("//tbody/tr[1]/td[2]").should('not.be.empty');
+        });
+    });
+
+    describe('Checkout Process', () => {
+        const customerData = {
+            name: 'John Doe',
+            country: 'USA',
+            city: 'New York',
+            card: '1234567890123456',
+            month: '12',
+            year: '2025'
+        };
+
+        beforeEach(() => {
+            // Add a product and go to cart
+            HomePage.clickFirstProduct();
+            ProductPage.addToCart();
+            CartPage.goToCart();
+        });
+
+        it('should open place order modal', () => {
+            CartPage
+                .clickPlaceOrder()
+                .verifyOrderModal();
+        });
+
+        it('should close place order modal', () => {
+            CartPage
+                .clickPlaceOrder()
+                .verifyOrderModal()
+                .closeOrderModal();
+        });
+
+        it('should complete purchase successfully', { tags: '@smoke' }, () => {
+            CartPage
+                .completePurchase(customerData)
+                .verifyPurchaseSuccess()
+                .confirmPurchase();
+
+            // Should redirect to homepage
+            cy.url().should('include', 'index.html');
+        });
+
+        it('should show validation for empty required fields', () => {
+            CartPage.clickPlaceOrder().clickPurchase();
+            cy.on('window:alert', (str) => {
+                expect(str).to.be.a('string');
+            });
+        });
+
+        it('should calculate total correctly for multiple items', () => {
+            // Go back and add another product
+            HomePage.goToHomePage();
+            cy.xpath(HomePage.locators.product_titles).eq(1).then($title => {
+                const productName = $title.text();
+                HomePage.clickProduct(productName);
+                ProductPage.addToCart();
+            });
+
+            CartPage.goToCart();
+
+            CartPage.getTotalPrice().then(totalText => {
+                const cleanTotal = totalText.replace(/[^\d]/g, '') // Extract numbers only
+                const total = parseInt(cleanTotal) || 0
+
+                if (total > 0) {
+                    expect(total).to.be.greaterThan(0)
+                } else {
+                    // Fallback: verify cart functionality
+                    cy.xpath("//tbody/tr").should('have.length', 2)
+                }
+            });
+        });
+    });
+});

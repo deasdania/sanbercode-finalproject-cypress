@@ -19,7 +19,7 @@ module.exports = {
     
     // Products
     product_cards: '.card',
-    product_titles: '.card-title',
+    product_titles: "//h4[@class='card-title']/a",
     product_images: '.card-img-top',
     product_prices: '.card-text',
     

@@ -62,12 +62,12 @@ class HomePage {
 
     // Product Methods
     clickProduct(productName) {
-        cy.get(this.locators.product_titles).contains(productName).click();
+        cy.xpath(this.locators.product_titles).contains(productName).click();
         return this;
     }
 
     clickFirstProduct() {
-        cy.get(this.locators.product_titles).first().click();
+        cy.xpath(this.locators.product_titles).first().click();
         return this;
     }
 
@@ -132,7 +132,7 @@ class HomePage {
         cy.get(this.locators.product_cards).should('have.length.greaterThan', 0);
         cy.get(this.locators.product_cards).first().within(() => {
             cy.get('img').should('be.visible');
-            cy.get(this.locators.product_titles).should('be.visible');
+            cy.xpath(this.locators.product_titles).should('be.visible');
             cy.get(this.locators.product_prices).should('contain', '$');
         });
         return this;

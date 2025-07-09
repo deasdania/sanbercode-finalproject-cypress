@@ -16,7 +16,7 @@ describe('Authentication Tests', () => {
     //   AuthenticationPage
     //     .openSignupModal()
     //     .clickSignupButton();
-      
+
     //   cy.on('window:alert', (str) => {
     //     expect(str).to.equal('Please fill out Username and Password.');
     //   });
@@ -26,7 +26,7 @@ describe('Authentication Tests', () => {
       const timestamp = Date.now();
       const username = `testuser${timestamp}`;
       const password = 'testpass123';
-      
+
       AuthenticationPage
         .signup(username, password)
         .verifySignupSuccess();
@@ -35,7 +35,7 @@ describe('Authentication Tests', () => {
     // it('should show error for user already exists', () => {
     //   const username = Cypress.env('username');
     //   const password = Cypress.env('password');
-      
+
     //   AuthenticationPage
     //     .signup(username, password)
     //     .verifyUserExists();
@@ -60,7 +60,7 @@ describe('Authentication Tests', () => {
     //   const timestamp = Date.now();
     //   const username = `invaliduser${timestamp}`;
     //   const password = 'invalidpass123';
-      
+
     //   AuthenticationPage
     //     .login(username, password)
     //     .verifyUserDoesNotExist();
@@ -69,22 +69,22 @@ describe('Authentication Tests', () => {
     it('should login with valid credentials', { tags: '@smoke' }, () => {
       const username = Cypress.env('username');
       const password = Cypress.env('password');
-      
+
       AuthenticationPage
         .login(username, password)
         .verifyLoginSuccess(username);
-      
+
       HomePage.verifyUserLoggedIn(username);
     });
 
     it('should logout successfully', () => {
       const username = Cypress.env('username');
       const password = Cypress.env('password');
-      
+
       AuthenticationPage
         .login(username, password)
         .verifyLoginSuccess(username);
-      
+
       HomePage
         .clickLogout()
         .verifyUserLoggedOut();

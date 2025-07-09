@@ -48,6 +48,7 @@ class ProductPage {
         cy.on('window:alert', (str) => {
             expect(str).to.equal('Product added');
         });
+        cy.wait(1000)
         return this;
     }
 }
